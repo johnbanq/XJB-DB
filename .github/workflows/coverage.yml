@@ -25,6 +25,7 @@ jobs:
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1.0.2
         with:
+          token: 15d94243-4d80-4180-ba71-fa87df0c53b6
           fail_ci_if_error:     true
 
       - name: Archive code coverage results
