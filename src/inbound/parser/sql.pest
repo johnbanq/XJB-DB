@@ -1,0 +1,62 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+
+identifier = @{ ASCII_ALPHANUMERIC+ }
+
+string = ${ "\"" ~ inner ~ "\"" }
+inner = @{ char* }
+char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+
+number = @{
+    "-"?
+    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+}
+
+literal = { string | number }
+
+
+create_table = {
+    "CREATE" ~ "TABLE" ~ identifier ~ "("
+    ~ create_table_fields
+    ~ ")"
+}
+
+create_table_fields = { create_table_field ~ ( "," ~ create_table_field )* }
+
+create_table_field = { identifier ~ identifier }
+
+
+insert = {
+    "INSERT" ~ "INTO" ~ identifier ~ "VALUES"
+    ~ "("  ~ insert_values ~ ")"
+}
+
+insert_values = { literal ~ ("," ~ literal )* }
+
+
+select = {
+    "SELECT" ~ select_clause
+    ~ select_from_clause
+}
+
+select_clause = { select_field_clause_all | select_field_clause_field_list }
+select_field_clause_all = { "*" }
+select_field_clause_field_list = { identifier ~ ("," ~ identifier)* }
+
+select_from_clause = { "FROM" ~ identifier }
+
+
+delete = {
+    "DELETE"
+    ~ "FROM" ~ identifier
+}
+
+drop_table = {
+    "DROP" ~ "TABLE" ~ identifier
+}
+
+query = _{ SOI ~ ( create_table | insert | select | delete | drop_table ) ~ ";" ~ EOI }
